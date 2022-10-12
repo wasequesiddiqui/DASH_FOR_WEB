@@ -6,7 +6,7 @@ import pandas as pd
 import investpy as inv
 
 ##
-df = inv.get_index_historical_data(index="Nifty 50", country="India", from_date='01/01/2018', to_date='01/01/2022')
+df = inv.get_index_historical_data(index="Nifty 50", country="India", from_date='01/01/2020', to_date='01/01/2022')
 ##
 df['Date'] = pd.to_datetime(df.index)
 ##
