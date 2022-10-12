@@ -4,9 +4,12 @@ from dash import dcc, Output, Input
 from dash import html
 import pandas as pd
 import investpy as inv
+import yfinance as yf
+from dateutil.relativedelta import relativedelta
 
+from datetime import datetime
 ##
-df = inv.get_index_historical_data(index="Nifty 50", country="India", from_date='01/01/2020', to_date='01/01/2022')
+df = yf.download("^NSEI", start=(datetime.now() - relativedelta(years=5)).strftime("%Y-%m-%d"), end=datetime.now().strftime("%Y-%m-%d"))
 ##
 df['Date'] = pd.to_datetime(df.index)
 ##
