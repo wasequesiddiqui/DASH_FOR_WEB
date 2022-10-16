@@ -1,15 +1,26 @@
 ##
 import dash
-from dash import dcc, Output, Input
-from dash import html
 import pandas as pd
 import investpy as inv
 import yfinance as yf
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from dash import dcc, Output, Input
+from dash import html
+
 from dateutil.relativedelta import relativedelta
 
 from datetime import datetime
 ##
+def get_log_return(df, column_name):
+    np.random.seed(0)
+    df['log_ret'] = np.log(df[column_name]) - np.log(df[column_name].shift(1))
+    df['Color'] = np.where(df["log_ret"]<0, 'Loss', 'Gain')
+    return df
+##
 df = yf.download("^NSEI", start=(datetime.now() - relativedelta(years=5)).strftime("%Y-%m-%d"), end=datetime.now().strftime("%Y-%m-%d"))
+df = get_log_return(df,'Close')
 ##
 df['Date'] = pd.to_datetime(df.index)
 ##
@@ -49,10 +60,13 @@ app.layout = html.Div(
         dcc.Graph(
             id="volume-chart"
         ),
+        dcc.Graph(
+            id="ret-chart"
+        ),
     ]
 )
 @app.callback(
-    [Output("price-chart", "figure"), Output("volume-chart", "figure")],
+    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure")],
     [
         Input("date-range", "start_date"),
         Input("date-range", "end_date"),
@@ -95,7 +109,16 @@ def update_charts(start_date, end_date):
             "colorway": ["#E12D39"],
         },
     }
-    return price_chart_figure, volume_chart_figure
+
+    scatter = px.scatter(
+        filtered_data,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Nifty 50",
+    )
+    return price_chart_figure, volume_chart_figure,scatter
 
 
 if __name__ == "__main__":
