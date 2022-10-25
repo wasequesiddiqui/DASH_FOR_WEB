@@ -13,16 +13,43 @@ from dateutil.relativedelta import relativedelta
 
 from datetime import datetime
 ##
-def get_log_return(df, column_name):
+def get_log_return(ticker, column_name):
     np.random.seed(0)
+    df = yf.download(ticker, start=(datetime.now() - relativedelta(years=5)).strftime("%Y-%m-%d"), end=datetime.now().strftime("%Y-%m-%d"))
+    df['Date'] = pd.to_datetime(df.index)
     df['log_ret'] = np.log(df[column_name]) - np.log(df[column_name].shift(1))
     df['Color'] = np.where(df["log_ret"]<0, 'Loss', 'Gain')
     return df
-##
-df = yf.download("^NSEI", start=(datetime.now() - relativedelta(years=5)).strftime("%Y-%m-%d"), end=datetime.now().strftime("%Y-%m-%d"))
-df = get_log_return(df,'Close')
-##
-df['Date'] = pd.to_datetime(df.index)
+
+## Nifty 50 Data
+df_NIFTY50 = get_log_return("^NSEI",'Close')
+
+## Tadawul Data
+
+## BIST 100 Data
+
+## Dow
+
+## NYSE
+
+## FTSE
+
+## German DAX
+
+## KOSPI
+
+## Dollar Index
+
+## United States Brent Oil Fund
+
+## Nikkei
+
+## Gold ETF
+
+## SILVERBEES.NS
+
+## Bursa Malaysia ^KLSE
+
 ##
 external_stylesheets = [
     {
@@ -47,10 +74,10 @@ app.layout = html.Div(
                 ),
                 dcc.DatePickerRange(
                     id="date-range",
-                    min_date_allowed=df.Date.min().date(),
-                    max_date_allowed=df.Date.max().date(),
-                    start_date=df.Date.min().date(),
-                    end_date=df.Date.max().date(),
+                    min_date_allowed=df_NIFTY50.Date.min().date(),
+                    max_date_allowed=df_NIFTY50.Date.max().date(),
+                    start_date=df_NIFTY50.Date.min().date(),
+                    end_date=df_NIFTY50.Date.max().date(),
                 )
             ], className="menu"
         ),
@@ -72,12 +99,16 @@ app.layout = html.Div(
         Input("date-range", "end_date"),
     ],
 )
+
+
 def update_charts(start_date, end_date):
-    mask = (
+    def get_filtered_data(start_date, end_date,df):
+        mask = (
             (df.Date >= start_date)
-            & (df.Date <= end_date)
-    )
-    filtered_data = df.loc[mask, :]
+            & (df.Date <= end_date))
+        return df.loc[mask, :]
+        
+    filtered_data = get_filtered_data(start_date, end_date, df=df_NIFTY50)
     price_chart_figure = {
         "data": [
             {

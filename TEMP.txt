@@ -1,0 +1,111 @@
+,scatter_tadawul,scatter_bist_100,scatter_DJI,scatter_FTSE,scatter_DAX,scatter_KOSPI,scatter_USD, scatter_OIL, scatter_NIKKEI, scatter_AU, scatter_AG, scatter_ML_BURSA
+
+scatter_tadawul = px.scatter(
+        filtered_data_tadawul,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Tadawul",
+    )
+
+    scatter_bist_100= px.scatter(
+        filtered_data_BIST100,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for BIST100",
+    )
+
+    scatter_DJI= px.scatter(
+        filtered_data_DJI,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Dow",
+    )
+
+    scatter_FTSE= px.scatter(
+        filtered_data_FTSE,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for FTSE",
+    )
+
+    scatter_DAX= px.scatter(
+        filtered_data_DAX,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for DAX",
+    )
+
+    scatter_KOSPI= px.scatter(
+        filtered_data_KOSPI,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for KOSPI",
+    )
+
+    scatter_USD= px.scatter(
+        filtered_data_DOLLAR,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Dollar Index",
+    )
+
+    scatter_OIL= px.scatter(
+        filtered_data_OIL,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Oil",
+    )
+
+    scatter_NIKKEI= px.scatter(
+        filtered_data_NIKKEI,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Nikkei",
+    )
+
+    scatter_AU = px.scatter(
+        filtered_data_AG,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Silver",
+    )
+
+    scatter_AG = px.scatter(
+        filtered_data_AU,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Gold",
+    )
+
+    scatter_ML_BURSA = px.scatter(
+        filtered_data_MY,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Malaysian Bursa",
+    )
+
+,Output("ret_chart_tadawul", "figure"),Output("ret_chart_bist", "figure"),Output("ret_chart_dji", "figure"),Output("ret_chart_ftse", "figure"),Output("ret_chart_dax", "figure"),Output("ret_chart_kospi", "figure"),Output("ret_chart_usd", "figure"),Output("ret_chart_oil", "figure"),Output("ret_chart_nikkei", "figure"),Output("ret_chart_ag", "figure"),Output("ret_chart_au", "figure"),Output("ret_chart_my", "figure")
