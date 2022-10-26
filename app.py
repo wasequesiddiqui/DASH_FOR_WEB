@@ -34,22 +34,31 @@ df_dji = get_log_return("^DJI",'Close')
 df_nya = get_log_return("^NYA",'Close')
 
 ## FTSE
+df_ftse = get_log_return("^FTSE",'Close')
 
 ## German DAX
+df_dax = get_log_return("^GDAXI",'Close')
 
 ## KOSPI
+df_kospi = get_log_return("^KS11",'Close')
 
 ## Dollar Index
+df_usd = get_log_return("DX-Y.NYB",'Close')
 
 ## United States Brent Oil Fund
+df_oil = get_log_return("BNO",'Close')
 
 ## Nikkei
+df_nikkei = get_log_return("^N225",'Close')
 
 ## Gold ETF
+df_au = get_log_return("AAAU",'Close')
 
 ## SILVERBEES.NS
+df_ag = get_log_return("SILVERBEES.NS",'Close')
 
 ## Bursa Malaysia ^KLSE
+df_my = get_log_return("^KLSE",'Close')
 
 ##
 external_stylesheets = [
@@ -100,10 +109,37 @@ app.layout = html.Div(
         dcc.Graph(
             id="ret-nya"
         ),
+        dcc.Graph(
+            id="ret-ftse"
+        ),
+        dcc.Graph(
+            id="ret-dax"
+        ),
+        dcc.Graph(
+            id="ret-kospi"
+        ),
+        dcc.Graph(
+            id="ret-usd"
+        ),
+        dcc.Graph(
+            id="ret-oil"
+        ),
+        dcc.Graph(
+            id="ret-nikkei"
+        ),
+        dcc.Graph(
+            id="ret-au"
+        ),
+        dcc.Graph(
+            id="ret-ag"
+        ),
+        dcc.Graph(
+            id="ret-my"
+        ),
     ]
 )
 @app.callback(
-    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure")],
+    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure"),Output("ret-ftse", "figure"),Output("ret-dax", "figure"),Output("ret-kospi", "figure"),Output("ret-usd", "figure"),Output("ret-oil", "figure"),Output("ret-nikkei", "figure"),Output("ret-au", "figure"),Output("ret-ag", "figure"),Output("ret-my", "figure")],
     [
         Input("date-range", "start_date"),
         Input("date-range", "end_date"),
@@ -122,6 +158,15 @@ def update_charts(start_date, end_date):
     filtered_data_bist = get_filtered_data(start_date, end_date, df=df_bist)
     filtered_data_dji = get_filtered_data(start_date, end_date, df=df_dji)
     filtered_data_nya = get_filtered_data(start_date, end_date, df=df_nya)
+    filtered_data_ftse = get_filtered_data(start_date, end_date, df=df_ftse)
+    filtered_data_dax = get_filtered_data(start_date, end_date, df=df_dax)
+    filtered_data_kospi = get_filtered_data(start_date, end_date, df=df_kospi)
+    filtered_data_usd = get_filtered_data(start_date, end_date, df=df_usd)
+    filtered_data_oil = get_filtered_data(start_date, end_date, df=df_oil)
+    filtered_data_nikkei = get_filtered_data(start_date, end_date, df=df_nikkei)
+    filtered_data_au = get_filtered_data(start_date, end_date, df=df_au)
+    filtered_data_ag = get_filtered_data(start_date, end_date, df=df_ag)
+    filtered_data_my = get_filtered_data(start_date, end_date, df=df_my)
 
     price_chart_figure = {
         "data": [
@@ -191,7 +236,88 @@ def update_charts(start_date, end_date):
         title="Daily Return for NYA",
     )
 
-    return price_chart_figure, volume_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya
+    scatter_ftse = px.scatter(
+        filtered_data_ftse,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for FTSE",
+    )
+
+    scatter_dax = px.scatter(
+        filtered_data_dax,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for DAX",
+    )
+
+    scatter_kospi = px.scatter(
+        filtered_data_kospi,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for KOSPI",
+    )
+
+    scatter_usd = px.scatter(
+        filtered_data_usd,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Dollar Index",
+    )
+
+    scatter_oil = px.scatter(
+        filtered_data_oil,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Brent Oil",
+    )
+
+    scatter_nikkei = px.scatter(
+        filtered_data_nikkei,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Nikkei",
+    )
+
+    scatter_au = px.scatter(
+        filtered_data_au,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Gold",
+    )
+
+    scatter_ag = px.scatter(
+        filtered_data_ag,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Silver",
+    )
+
+    scatter_my = px.scatter(
+        filtered_data_my,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for Malaysian Bursa",
+    )
+
+    return price_chart_figure, volume_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya,scatter_ftse,scatter_dax,scatter_kospi,scatter_usd,scatter_oil,scatter_nikkei,scatter_au,scatter_ag, scatter_my
 
 
 if __name__ == "__main__":
