@@ -24,13 +24,14 @@ def get_log_return(ticker, column_name):
 ## Nifty 50 Data
 df_NIFTY50 = get_log_return("^NSEI",'Close')
 
-## Tadawul Data
-
 ## BIST 100 Data
+df_bist = get_log_return("XU100.IS",'Close')
 
 ## Dow
+df_dji = get_log_return("^DJI",'Close')
 
 ## NYSE
+df_nya = get_log_return("^NYA",'Close')
 
 ## FTSE
 
@@ -90,10 +91,19 @@ app.layout = html.Div(
         dcc.Graph(
             id="ret-chart"
         ),
+        dcc.Graph(
+            id="ret-bist"
+        ),
+        dcc.Graph(
+            id="ret-dji"
+        ),
+        dcc.Graph(
+            id="ret-nya"
+        ),
     ]
 )
 @app.callback(
-    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure")],
+    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure")],
     [
         Input("date-range", "start_date"),
         Input("date-range", "end_date"),
@@ -109,6 +119,10 @@ def update_charts(start_date, end_date):
         return df.loc[mask, :]
         
     filtered_data = get_filtered_data(start_date, end_date, df=df_NIFTY50)
+    filtered_data_bist = get_filtered_data(start_date, end_date, df=df_bist)
+    filtered_data_dji = get_filtered_data(start_date, end_date, df=df_dji)
+    filtered_data_nya = get_filtered_data(start_date, end_date, df=df_nya)
+
     price_chart_figure = {
         "data": [
             {
@@ -149,7 +163,35 @@ def update_charts(start_date, end_date):
         color_continuous_scale=px.colors.sequential.Plotly3,
         title="Daily Return for Nifty 50",
     )
-    return price_chart_figure, volume_chart_figure,scatter
+
+    scatter_bist100 = px.scatter(
+        filtered_data_bist,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for BIST 100",
+    )
+
+    scatter_dji = px.scatter(
+        filtered_data_dji,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for DJI",
+    )
+
+    scatter_nya = px.scatter(
+        filtered_data_nya,
+        x="Date",
+        y="log_ret",
+        color="Color",
+        color_continuous_scale=px.colors.sequential.Plotly3,
+        title="Daily Return for NYA",
+    )
+
+    return price_chart_figure, volume_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya
 
 
 if __name__ == "__main__":
