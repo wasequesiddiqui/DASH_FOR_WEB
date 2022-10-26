@@ -15,10 +15,13 @@ from datetime import datetime
 ##
 def get_log_return(ticker, column_name):
     np.random.seed(0)
+    return_col = 'log_ret_' + ticker
     df = yf.download(ticker, start=(datetime.now() - relativedelta(years=5)).strftime("%Y-%m-%d"), end=datetime.now().strftime("%Y-%m-%d"))
     df['Date'] = pd.to_datetime(df.index)
     df['log_ret'] = np.log(df[column_name]) - np.log(df[column_name].shift(1))
     df['Color'] = np.where(df["log_ret"]<0, 'Loss', 'Gain')
+    df['Volatility'] =  df['log_ret'].rolling(window=252).std()*np.sqrt(252)*100
+    df[return_col] = df['log_ret']
     return df
 
 ## Nifty 50 Data
@@ -60,6 +63,7 @@ df_ag = get_log_return("SILVERBEES.NS",'Close')
 ## Bursa Malaysia ^KLSE
 df_my = get_log_return("^KLSE",'Close')
 
+
 ##
 external_stylesheets = [
     {
@@ -96,6 +100,9 @@ app.layout = html.Div(
         ),
         dcc.Graph(
             id="volume-chart"
+        ),
+        dcc.Graph(
+            id="vix-chart"
         ),
         dcc.Graph(
             id="ret-chart"
@@ -139,7 +146,7 @@ app.layout = html.Div(
     ]
 )
 @app.callback(
-    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure"),Output("ret-ftse", "figure"),Output("ret-dax", "figure"),Output("ret-kospi", "figure"),Output("ret-usd", "figure"),Output("ret-oil", "figure"),Output("ret-nikkei", "figure"),Output("ret-au", "figure"),Output("ret-ag", "figure"),Output("ret-my", "figure")],
+    [Output("price-chart", "figure"), Output("volume-chart", "figure"), Output("vix-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure"),Output("ret-ftse", "figure"),Output("ret-dax", "figure"),Output("ret-kospi", "figure"),Output("ret-usd", "figure"),Output("ret-oil", "figure"),Output("ret-nikkei", "figure"),Output("ret-au", "figure"),Output("ret-ag", "figure"),Output("ret-my", "figure")],
     [
         Input("date-range", "start_date"),
         Input("date-range", "end_date"),
@@ -317,7 +324,7 @@ def update_charts(start_date, end_date):
         title="Daily Return for Malaysian Bursa",
     )
 
-    return price_chart_figure, volume_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya,scatter_ftse,scatter_dax,scatter_kospi,scatter_usd,scatter_oil,scatter_nikkei,scatter_au,scatter_ag, scatter_my
+    return price_chart_figure, volume_chart_figure,vix_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya,scatter_ftse,scatter_dax,scatter_kospi,scatter_usd,scatter_oil,scatter_nikkei,scatter_au,scatter_ag, scatter_my
 
 
 if __name__ == "__main__":
