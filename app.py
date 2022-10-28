@@ -6,11 +6,11 @@ import yfinance as yf
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import gc
+
 from dash import dcc, Output, Input
 from dash import html
-
 from dateutil.relativedelta import relativedelta
-
 from datetime import datetime
 ##
 def get_log_return(ticker, column_name):
@@ -24,45 +24,72 @@ def get_log_return(ticker, column_name):
     df[return_col] = df['log_ret']
     return df
 
+def get_model_columns(ticker,df):
+    df = df[['log_ret_' + ticker,'Date']]
+    return df
+
 ## Nifty 50 Data
 df_NIFTY50 = get_log_return("^NSEI",'Close')
+df_NIFTY50_mod = get_model_columns("^NSEI",df_NIFTY50)
+gc.collect()
 
 ## BIST 100 Data
 df_bist = get_log_return("XU100.IS",'Close')
+df_bist_mod = get_model_columns("XU100.IS",df_bist)
+gc.collect()
 
 ## Dow
 df_dji = get_log_return("^DJI",'Close')
+df_dji_mod = get_model_columns("^DJI",df_dji)
+gc.collect()
 
 ## NYSE
 df_nya = get_log_return("^NYA",'Close')
+df_nya_mod = get_model_columns("^NYA",df_nya)
+gc.collect()
 
 ## FTSE
 df_ftse = get_log_return("^FTSE",'Close')
 
 ## German DAX
 df_dax = get_log_return("^GDAXI",'Close')
+df_dax_mod = get_model_columns("^GDAXI",df_dax)
+gc.collect()
 
 ## KOSPI
 df_kospi = get_log_return("^KS11",'Close')
+df_kospi_mod = get_model_columns("^KS11",df_kospi)
+gc.collect()
 
 ## Dollar Index
 df_usd = get_log_return("DX-Y.NYB",'Close')
+df_usd_mod = get_model_columns("DX-Y.NYB",df_usd)
+gc.collect()
 
 ## United States Brent Oil Fund
 df_oil = get_log_return("BNO",'Close')
+df_oil_mod = get_model_columns("BNO",df_oil)
+gc.collect()
 
 ## Nikkei
 df_nikkei = get_log_return("^N225",'Close')
+df_nikkei_mod = get_model_columns("^N225",df_nikkei)
+gc.collect()
 
 ## Gold ETF
 df_au = get_log_return("AAAU",'Close')
+df_au_mod = get_model_columns("AAAU",df_au)
+gc.collect()
 
 ## SILVERBEES.NS
 df_ag = get_log_return("SILVERBEES.NS",'Close')
+df_ag_mod = get_model_columns("SILVERBEES.NS",df_ag)
+gc.collect()
 
 ## Bursa Malaysia ^KLSE
 df_my = get_log_return("^KLSE",'Close')
-
+df_my_mod = get_model_columns("^KLSE",df_my)
+gc.collect()
 
 ##
 external_stylesheets = [
