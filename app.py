@@ -17,16 +17,23 @@ def get_log_return(ticker, column_name):
     np.random.seed(0)
     return_col = 'log_ret_' + ticker
     df = yf.download(ticker, start=(datetime.now() - relativedelta(years=5)).strftime("%Y-%m-%d"), end=datetime.now().strftime("%Y-%m-%d"))
-    df['Date'] = pd.to_datetime(df.index)
+    df['Date_NI'] = pd.to_datetime(df.index)
+    df['Date_NI'] = df['Date_NI'].dt.date
     df['log_ret'] = np.log(df[column_name]) - np.log(df[column_name].shift(1))
     df['Color'] = np.where(df["log_ret"]<0, 'Loss', 'Gain')
-    df['Volatility'] =  df['log_ret'].rolling(window=252).std()*np.sqrt(252)*100
+    # df['Volatility'] =  df['log_ret'].rolling(window=252).std()*np.sqrt(252)*100
     df[return_col] = df['log_ret']
     return df
 
 def get_model_columns(ticker,df):
-    df = df[['log_ret_' + ticker,'Date']]
+    df = df[['log_ret_' + ticker,'Date_NI']]
     return df
+
+def get_complete_model_df(df_main, df_others):
+    df_all = df_main
+    for df in df_others:
+        df_all = df_all.merge(df, on='Date_NI', how='left')
+    return df_main
 
 ## Nifty 50 Data
 df_NIFTY50 = get_log_return("^NSEI",'Close')
@@ -50,6 +57,8 @@ gc.collect()
 
 ## FTSE
 df_ftse = get_log_return("^FTSE",'Close')
+df_ftse_mod = get_model_columns("^FTSE",df_ftse)
+gc.collect()
 
 ## German DAX
 df_dax = get_log_return("^GDAXI",'Close')
@@ -91,6 +100,8 @@ df_my = get_log_return("^KLSE",'Close')
 df_my_mod = get_model_columns("^KLSE",df_my)
 gc.collect()
 
+df_overall_model = get_complete_model_df(df_main= df_NIFTY50_mod, df_others= [df_bist_mod,df_dji_mod, df_nya_mod, df_ftse_mod, df_dax_mod, df_kospi_mod, df_usd_mod, df_oil_mod, df_nikkei_mod, df_au_mod, df_ag_mod, df_my_mod])
+
 ##
 external_stylesheets = [
     {
@@ -115,10 +126,10 @@ app.layout = html.Div(
                 ),
                 dcc.DatePickerRange(
                     id="date-range",
-                    min_date_allowed=df_NIFTY50.Date.min().date(),
-                    max_date_allowed=df_NIFTY50.Date.max().date(),
-                    start_date=df_NIFTY50.Date.min().date(),
-                    end_date=df_NIFTY50.Date.max().date(),
+                    min_date_allowed=df_NIFTY50.Date_NI.min(),
+                    max_date_allowed=df_NIFTY50.Date_NI.max(),
+                    start_date=df_NIFTY50.Date_NI.min(),
+                    end_date=df_NIFTY50.Date_NI.max(),
                 )
             ], className="menu"
         ),
@@ -127,9 +138,6 @@ app.layout = html.Div(
         ),
         dcc.Graph(
             id="volume-chart"
-        ),
-        dcc.Graph(
-            id="vix-chart"
         ),
         dcc.Graph(
             id="ret-chart"
@@ -173,7 +181,7 @@ app.layout = html.Div(
     ]
 )
 @app.callback(
-    [Output("price-chart", "figure"), Output("volume-chart", "figure"), Output("vix-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure"),Output("ret-ftse", "figure"),Output("ret-dax", "figure"),Output("ret-kospi", "figure"),Output("ret-usd", "figure"),Output("ret-oil", "figure"),Output("ret-nikkei", "figure"),Output("ret-au", "figure"),Output("ret-ag", "figure"),Output("ret-my", "figure")],
+    [Output("price-chart", "figure"), Output("volume-chart", "figure"),Output("ret-chart", "figure"),Output("ret-bist", "figure"),Output("ret-dji", "figure"),Output("ret-nya", "figure"),Output("ret-ftse", "figure"),Output("ret-dax", "figure"),Output("ret-kospi", "figure"),Output("ret-usd", "figure"),Output("ret-oil", "figure"),Output("ret-nikkei", "figure"),Output("ret-au", "figure"),Output("ret-ag", "figure"),Output("ret-my", "figure")],
     [
         Input("date-range", "start_date"),
         Input("date-range", "end_date"),
@@ -184,8 +192,8 @@ app.layout = html.Div(
 def update_charts(start_date, end_date):
     def get_filtered_data(start_date, end_date,df):
         mask = (
-            (df.Date >= start_date)
-            & (df.Date <= end_date))
+            (df.Date_NI >= pd.to_datetime(start_date,format='%Y-%m-%d'))
+            & (df.Date_NI <= pd.to_datetime(end_date,format='%Y-%m-%d')))
         return df.loc[mask, :]
         
     filtered_data = get_filtered_data(start_date, end_date, df=df_NIFTY50)
@@ -205,7 +213,7 @@ def update_charts(start_date, end_date):
     price_chart_figure = {
         "data": [
             {
-                "x": filtered_data["Date"],
+                "x": filtered_data["Date_NI"],
                 "y": filtered_data["Close"],
                 "type": "lines",
             },
@@ -215,13 +223,13 @@ def update_charts(start_date, end_date):
                 "text": "Close of Nifty50",
             },
             "colorway": ["#17B897"],
-        },
+        }
     }
 
     volume_chart_figure = {
         "data": [
             {
-                "x": filtered_data["Date"],
+                "x": filtered_data["Date_NI"],
                 "y": filtered_data["Volume"],
                 "type": "lines",
             },
@@ -231,84 +239,140 @@ def update_charts(start_date, end_date):
                 "text": "Volume Nifty50",
             },
             "colorway": ["#E12D39"],
-        },
+        }
     }
 
-    scatter = px.scatter(
-        filtered_data,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for Nifty 50",
-    )
+    scatter = {
+        "data": [
+            {
+                "x": filtered_data["Date_NI"],
+                "y": filtered_data["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns Nifty50",
+            },
+            "colorway": ["#E12D39"],
+        }
+    }
 
-    scatter_bist100 = px.scatter(
-        filtered_data_bist,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for BIST 100",
-    )
+    scatter_bist100 = {
+        "data": [
+            {
+                "x": filtered_data_bist["Date_NI"],
+                "y": filtered_data_bist["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns Bist 100",
+            },
+            "colorway": ["#E30A17"],
+        }
+    }
 
-    scatter_dji = px.scatter(
-        filtered_data_dji,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for DJI",
-    )
+    scatter_dji = {
+        "data": [
+            {
+                "x": filtered_data_dji["Date_NI"],
+                "y": filtered_data_dji["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns DJI",
+            },
+            "colorway": ["#ffbc05"],
+        }
+    }
 
-    scatter_nya = px.scatter(
-        filtered_data_nya,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for NYA",
-    )
+    scatter_nya = {
+        "data": [
+            {
+                "x": filtered_data_nya["Date_NI"],
+                "y": filtered_data_nya["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns Nasdaq",
+            },
+            "colorway": ["#007994"],
+        }
+    }
 
-    scatter_ftse = px.scatter(
-        filtered_data_ftse,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for FTSE",
-    )
+    scatter_ftse = {
+        "data": [
+            {
+                "x": filtered_data_ftse["Date_NI"],
+                "y": filtered_data_ftse["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns FTSE",
+            },
+            "colorway": ["#e45b24"],
+        }
+    }
 
-    scatter_dax = px.scatter(
-        filtered_data_dax,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for DAX",
-    )
+    scatter_dax = {
+        "data": [
+            {
+                "x": filtered_data_dax["Date_NI"],
+                "y": filtered_data_dax["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns DAX",
+            },
+            "colorway": ["#248ab2"],
+        }
+    }
 
-    scatter_kospi = px.scatter(
-        filtered_data_kospi,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for KOSPI",
-    )
+    scatter_kospi = {
+        "data": [
+            {
+                "x": filtered_data_kospi["Date_NI"],
+                "y": filtered_data_kospi["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns KOSPI",
+            },
+            "colorway": ["#cce7e8"],
+        }
+    }
 
-    scatter_usd = px.scatter(
-        filtered_data_usd,
-        x="Date",
-        y="log_ret",
-        color="Color",
-        color_continuous_scale=px.colors.sequential.Plotly3,
-        title="Daily Return for Dollar Index",
-    )
+    scatter_usd = {
+        "data": [
+            {
+                "x": filtered_data_usd["Date_NI"],
+                "y": filtered_data_usd["log_ret"],
+                "type": "lines",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Daily Returns USD",
+            },
+            "colorway": ["#a2a0a3"],
+        }
+    }
 
     scatter_oil = px.scatter(
         filtered_data_oil,
-        x="Date",
+        x="Date_NI",
         y="log_ret",
         color="Color",
         color_continuous_scale=px.colors.sequential.Plotly3,
@@ -317,7 +381,7 @@ def update_charts(start_date, end_date):
 
     scatter_nikkei = px.scatter(
         filtered_data_nikkei,
-        x="Date",
+        x="Date_NI",
         y="log_ret",
         color="Color",
         color_continuous_scale=px.colors.sequential.Plotly3,
@@ -326,7 +390,7 @@ def update_charts(start_date, end_date):
 
     scatter_au = px.scatter(
         filtered_data_au,
-        x="Date",
+        x="Date_NI",
         y="log_ret",
         color="Color",
         color_continuous_scale=px.colors.sequential.Plotly3,
@@ -335,7 +399,7 @@ def update_charts(start_date, end_date):
 
     scatter_ag = px.scatter(
         filtered_data_ag,
-        x="Date",
+        x="Date_NI",
         y="log_ret",
         color="Color",
         color_continuous_scale=px.colors.sequential.Plotly3,
@@ -344,14 +408,14 @@ def update_charts(start_date, end_date):
 
     scatter_my = px.scatter(
         filtered_data_my,
-        x="Date",
+        x="Date_NI",
         y="log_ret",
         color="Color",
         color_continuous_scale=px.colors.sequential.Plotly3,
         title="Daily Return for Malaysian Bursa",
     )
 
-    return price_chart_figure, volume_chart_figure,vix_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya,scatter_ftse,scatter_dax,scatter_kospi,scatter_usd,scatter_oil,scatter_nikkei,scatter_au,scatter_ag, scatter_my
+    return price_chart_figure, volume_chart_figure,scatter,scatter_bist100,scatter_dji,scatter_nya,scatter_ftse,scatter_dax,scatter_kospi,scatter_usd,scatter_oil,scatter_nikkei,scatter_au,scatter_ag, scatter_my
 
 
 if __name__ == "__main__":
