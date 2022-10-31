@@ -141,7 +141,41 @@ df_prediction['log_ret_^NYA'] = df_prediction['log_ret_^NYA'].interpolate(method
 df_forecast = model.predict(df_prediction)
 # %%
 df_forecast.tail()
+
 # %%
 fig1 = model.plot(df_forecast)
 fig2 = model.plot_components(df_forecast)
+
 # %%
+df_prediction['ds'] = pd.to_datetime(df_prediction['ds'])
+df_comparision = pd.merge(df_prediction,df_forecast, on='ds', how='inner')
+
+# %%
+df_comparision = df_comparision[['ds','log_ret_^NSEI','trend','yhat_lower','yhat_upper','additive_terms','additive_terms_lower','additive_terms_upper','extra_regressors_additive','extra_regressors_additive_lower','extra_regressors_additive_upper','multiplicative_terms','multiplicative_terms_lower','multiplicative_terms_upper','yhat']]
+
+# %%
+mask_nifty50_close = (df_NIFTY50.Date_NI <= training_end_date)
+df_NIFTY50_training = df_NIFTY50.loc[mask_nifty50_close,:]
+
+#%%
+df_NIFTY50_prediction = df_NIFTY50.loc[(df_NIFTY50.Date_NI > training_end_date),:]
+
+# %%
+df_NIFTY50_prediction['Date_NI'] = pd.to_datetime(df_NIFTY50_prediction['Date_NI'])
+
+# %%
+df_finall = pd.merge(df_NIFTY50_prediction,df_comparision, left_on='Date_NI', right_on='ds', how='inner')
+
+# %%
+starting_close_price = round(df_NIFTY50_training.tail(1)['Close'],2)
+
+# %%
+df_final_utility_data = df_finall[['Close','Adj Close','Volume','ds','log_ret_^NSEI_y','trend','yhat_lower','yhat_upper','yhat']]
+
+# %%
+lst_predicted_close = []
+lst_predicted_close_lower = []
+lst_predicted_close_upper = []
+calc_close_lower = starting_close_price
+calc_close_upper = starting_close_price
+calc_close = starting_close_price
