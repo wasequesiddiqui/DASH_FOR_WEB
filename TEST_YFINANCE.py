@@ -167,7 +167,7 @@ df_NIFTY50_prediction['Date_NI'] = pd.to_datetime(df_NIFTY50_prediction['Date_NI
 df_finall = pd.merge(df_NIFTY50_prediction,df_comparision, left_on='Date_NI', right_on='ds', how='inner')
 
 # %%
-starting_close_price = round(df_NIFTY50_training.tail(1)['Close'],2)
+starting_close_price = round(df_NIFTY50_training.tail(1)['Close'],2)[0]
 
 # %%
 df_final_utility_data = df_finall[['Close','Adj Close','Volume','ds','log_ret_^NSEI_y','trend','yhat_lower','yhat_upper','yhat']]
@@ -179,3 +179,33 @@ lst_predicted_close_upper = []
 calc_close_lower = starting_close_price
 calc_close_upper = starting_close_price
 calc_close = starting_close_price
+
+for i in range(len(df_final_utility_data)):
+    calc_close_lower = calc_close*(1+df_final_utility_data.loc[i,"yhat_lower"])
+    calc_close_upper = calc_close*(1+df_final_utility_data.loc[i,"yhat_upper"])
+    calc_close = calc_close*(1+df_final_utility_data.loc[i,"yhat"])
+    lst_predicted_close.append(calc_close)
+    lst_predicted_close_lower.append(calc_close_lower)
+    lst_predicted_close_upper.append(calc_close_upper)
+
+df_final_utility_data['pred_lower'] = lst_predicted_close_lower
+df_final_utility_data['pred_upper'] = lst_predicted_close_upper
+df_final_utility_data['pred_close'] = lst_predicted_close
+
+# %%
+df_final_utility_data['band'] = df_final_utility_data['pred_upper'] - df_final_utility_data['pred_lower']
+df_final_utility_data['delta'] = df_final_utility_data['pred_close'] - df_final_utility_data['Close']
+
+# %%
+fig = px.line(df_final_utility_data, x=df_final_utility_data['ds'], y=df_final_utility_data['pred_close'])
+fig.add_scatter(x=df_final_utility_data['ds'], y=df_final_utility_data['pred_upper'], mode='lines')
+fig.add_scatter(x=df_final_utility_data['ds'], y=df_final_utility_data['pred_lower'], mode='lines')
+fig.add_scatter(x=df_final_utility_data['ds'], y=df_final_utility_data['pred_lower'], mode='lines')
+fig.show()
+# %%
+fig2 = px.line(df_final_utility_data, x=df_final_utility_data['ds'], y=df_final_utility_data['pred_close'])
+fig2.add_scatter(x=df_final_utility_data['ds'], y=df_final_utility_data['Close'], mode='lines')
+
+# %%
+
+# %%
