@@ -86,8 +86,54 @@ df_nya = get_log_return("^NYA",'Close')
 df_nya_mod = get_model_columns("^NYA",df_nya)
 gc.collect()
 
+# %%
+## FTSE
+df_ftse = get_log_return("^FTSE",'Close')
+df_ftse_mod = get_model_columns("^FTSE",df_ftse)
+gc.collect()
+
+## German DAX
+df_dax = get_log_return("^GDAXI",'Close')
+df_dax_mod = get_model_columns("^GDAXI",df_dax)
+gc.collect()
+
+## KOSPI
+df_kospi = get_log_return("^KS11",'Close')
+df_kospi_mod = get_model_columns("^KS11",df_kospi)
+gc.collect()
+
+## Dollar Index
+df_usd = get_log_return("DX-Y.NYB",'Close')
+df_usd_mod = get_model_columns("DX-Y.NYB",df_usd)
+gc.collect()
+
+## United States Brent Oil Fund
+df_oil = get_log_return("BNO",'Close')
+df_oil_mod = get_model_columns("BNO",df_oil)
+gc.collect()
+
+## Nikkei
+df_nikkei = get_log_return("^N225",'Close')
+df_nikkei_mod = get_model_columns("^N225",df_nikkei)
+gc.collect()
+
+## Gold ETF
+df_au = get_log_return("AAAU",'Close')
+df_au_mod = get_model_columns("AAAU",df_au)
+gc.collect()
+
+## SILVERBEES.NS
+df_ag = get_log_return("SILVERBEES.NS",'Close')
+df_ag_mod = get_model_columns("SILVERBEES.NS",df_ag)
+gc.collect()
+
+## Bursa Malaysia ^KLSE
+df_my = get_log_return("^KLSE",'Close')
+df_my_mod = get_model_columns("^KLSE",df_my)
+gc.collect()
+
 #%%
-df_overall_model = get_complete_model_df(df_main= df_NIFTY50_mod, df_others= [df_bist_mod,df_dji_mod, df_nya_mod])
+df_overall_model = get_complete_model_df(df_main= df_NIFTY50_mod, df_others= [df_bist_mod,df_dji_mod, df_nya_mod, df_ftse_mod, df_dax_mod, df_kospi, df_usd_mod, df_oil_mod, df_nikkei_mod, df_au_mod, df_ag_mod, df_my_mod])
 
 # %%
 df_overall_model.rename(columns = {'Date_NI':'DS'}, inplace = True)
@@ -125,19 +171,42 @@ model = p.Prophet(holidays=df_holidays)
 model.add_regressor('log_ret_XU100.IS')
 model.add_regressor('log_ret_^DJI')
 model.add_regressor('log_ret_^NYA')
+model.add_regressor('log_ret_^FTSE')
+model.add_regressor('log_ret_^GDAXI')
+model.add_regressor('log_ret_^KS11')
+model.add_regressor('log_ret_DX-Y.NYB')
+model.add_regressor('log_ret_BNO')
+model.add_regressor('log_ret_^N225')
+model.add_regressor('log_ret_^KLSE')
 df_training_overall.rename(columns = {'log_ret_^NSEI':'y','DS':'ds'}, inplace = True)
 
+#%%
 df_training_overall['log_ret_XU100.IS'] = df_training_overall['log_ret_XU100.IS'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 df_training_overall['log_ret_^DJI'] = df_training_overall['log_ret_^DJI'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 df_training_overall['log_ret_^NYA'] = df_training_overall['log_ret_^NYA'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
-
+df_training_overall['log_ret_^FTSE'] = df_training_overall['log_ret_^FTSE'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_training_overall['log_ret_^GDAXI'] = df_training_overall['log_ret_^GDAXI'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_training_overall['log_ret_^KS11'] = df_training_overall['log_ret_^KS11'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_training_overall['log_ret_DX-Y.NYB'] = df_training_overall['log_ret_DX-Y.NYB'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_training_overall['log_ret_BNO'] = df_training_overall['log_ret_BNO'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_training_overall['log_ret_^N225'] = df_training_overall['log_ret_^N225'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_training_overall['log_ret_^KLSE'] = df_training_overall['log_ret_^KLSE'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 model.fit(df_training_overall)
+
 # %%
 df_prediction.rename(columns = {'DS':'ds'}, inplace = True)
 df_prediction.drop(['log_ret_^NSEI'], axis=1)
 df_prediction['log_ret_XU100.IS'] = df_prediction['log_ret_XU100.IS'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 df_prediction['log_ret_^DJI'] = df_prediction['log_ret_^DJI'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 df_prediction['log_ret_^NYA'] = df_prediction['log_ret_^NYA'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_^FTSE'] = df_prediction['log_ret_^FTSE'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_^GDAXI'] = df_prediction['log_ret_^GDAXI'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_^KS11'] = df_prediction['log_ret_^KS11'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_DX-Y.NYB'] = df_prediction['log_ret_DX-Y.NYB'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_BNO'] = df_prediction['log_ret_BNO'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_^N225'] = df_prediction['log_ret_^N225'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+df_prediction['log_ret_^KLSE'] = df_prediction['log_ret_^KLSE'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
+
 df_forecast = model.predict(df_prediction)
 # %%
 df_forecast.tail()
@@ -205,7 +274,7 @@ fig.show()
 # %%
 fig2 = px.line(df_final_utility_data, x=df_final_utility_data['ds'], y=df_final_utility_data['pred_close'])
 fig2.add_scatter(x=df_final_utility_data['ds'], y=df_final_utility_data['Close'], mode='lines')
-
+fig2.show()
 # %%
-
+df_final_utility_data.head(10)
 # %%
