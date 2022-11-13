@@ -132,10 +132,10 @@ df_my = get_log_return("^KLSE",'Close')
 df_my_mod = get_model_columns("^KLSE",df_my)
 gc.collect()
 
-#%%
+#%% create complete model by merging nifty with other index returns
 df_overall_model = get_complete_model_df(df_main= df_NIFTY50_mod, df_others= [df_bist_mod,df_dji_mod, df_nya_mod, df_ftse_mod, df_dax_mod, df_kospi, df_usd_mod, df_oil_mod, df_nikkei_mod, df_au_mod, df_ag_mod, df_my_mod])
 
-# %%
+#%%
 df_overall_model.rename(columns = {'Date_NI':'DS'}, inplace = True)
 
 # %%
