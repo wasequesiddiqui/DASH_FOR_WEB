@@ -135,10 +135,10 @@ gc.collect()
 #%% create complete model by merging nifty with other index returns
 df_overall_model = get_complete_model_df(df_main= df_NIFTY50_mod, df_others= [df_bist_mod,df_dji_mod, df_nya_mod, df_ftse_mod, df_dax_mod, df_kospi, df_usd_mod, df_oil_mod, df_nikkei_mod, df_au_mod, df_ag_mod, df_my_mod])
 
-#%%
+#%% rename the ds column (date sample)
 df_overall_model.rename(columns = {'Date_NI':'DS'}, inplace = True)
 
-# %%
+# %% get the 5 year prior date
 start_date = (datetime.now() - relativedelta(years=5)).date()
 training_end_date = (datetime.now() - relativedelta(days=60)).date()
 training_end_date_slice = (datetime.now() - relativedelta(days=120)).date()
@@ -150,12 +150,12 @@ df_prediction = df_overall_model.loc[mask_prediction,:]
 
 holiday_dates = []
 
-# %%
+# %% get the list of weekends
 for date in rrule(DAILY, dtstart=start_date, until=datetime.now()):
     if((date.strftime('%A')=="Saturday") or (date.strftime('%A')=="Sunday")):
         holiday_dates.append(date.date())
 
-# %%
+# %% attach holiday list to the model
 df_holidays = pd.DataFrame()
 df_holidays['ds'] = holiday_dates
 df_holidays['holiday'] = "Weekend"
@@ -166,7 +166,7 @@ df_training_overall_tuning['ds'] = pd.to_datetime(df_training_overall_tuning['ds
 #%%
 # params = get_tuned_param(df_training_overall_tuning, (datetime.now() - relativedelta(years=5)))
 
-# %%
+# %% adding all the co-regressors
 model = p.Prophet(holidays=df_holidays)
 model.add_regressor('log_ret_XU100.IS')
 model.add_regressor('log_ret_^DJI')
@@ -180,7 +180,7 @@ model.add_regressor('log_ret_^N225')
 model.add_regressor('log_ret_^KLSE')
 df_training_overall.rename(columns = {'log_ret_^NSEI':'y','DS':'ds'}, inplace = True)
 
-#%%
+#%% fill in the missing value by using interpolate as imputation
 df_training_overall['log_ret_XU100.IS'] = df_training_overall['log_ret_XU100.IS'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 df_training_overall['log_ret_^DJI'] = df_training_overall['log_ret_^DJI'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 df_training_overall['log_ret_^NYA'] = df_training_overall['log_ret_^NYA'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
@@ -193,7 +193,7 @@ df_training_overall['log_ret_^N225'] = df_training_overall['log_ret_^N225'].inte
 df_training_overall['log_ret_^KLSE'] = df_training_overall['log_ret_^KLSE'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 model.fit(df_training_overall)
 
-# %%
+# %% interpolate missing data in prediction data set
 df_prediction.rename(columns = {'DS':'ds'}, inplace = True)
 df_prediction.drop(['log_ret_^NSEI'], axis=1)
 df_prediction['log_ret_XU100.IS'] = df_prediction['log_ret_XU100.IS'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
@@ -208,18 +208,16 @@ df_prediction['log_ret_^N225'] = df_prediction['log_ret_^N225'].interpolate(meth
 df_prediction['log_ret_^KLSE'] = df_prediction['log_ret_^KLSE'].interpolate(method='spline', order=1, limit=10, limit_direction='both')
 
 df_forecast = model.predict(df_prediction)
-# %%
-df_forecast.tail()
 
-# %%
+# %% get the forecast and plot components
 fig1 = model.plot(df_forecast)
 fig2 = model.plot_components(df_forecast)
 
-# %%
+# %% create comparasion data set to check for predicted and actual value
 df_prediction['ds'] = pd.to_datetime(df_prediction['ds'])
 df_comparision = pd.merge(df_prediction,df_forecast, on='ds', how='inner')
 
-# %%
+# %% 
 df_comparision = df_comparision[['ds','log_ret_^NSEI','trend','yhat_lower','yhat_upper','additive_terms','additive_terms_lower','additive_terms_upper','extra_regressors_additive','extra_regressors_additive_lower','extra_regressors_additive_upper','multiplicative_terms','multiplicative_terms_lower','multiplicative_terms_upper','yhat']]
 
 # %%
