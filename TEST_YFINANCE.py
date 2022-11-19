@@ -276,3 +276,34 @@ fig2.show()
 # %%
 df_final_utility_data.head(10)
 # %%
+delta_kurt = pd.Series(df_final_utility_data['delta']).kurtosis(skipna = True)
+delta_mean = pd.Series(df_final_utility_data['delta']).mean(skipna = True)
+delta_median = pd.Series(df_final_utility_data['delta']).median(skipna = True)
+delta_std = df_final_utility_data['delta'].std()
+
+# %%
+band_kurt = pd.Series(df_final_utility_data['band']).kurtosis(skipna = True)
+band_mean = pd.Series(df_final_utility_data['band']).mean(skipna = True)
+band_median = pd.Series(df_final_utility_data['band']).median(skipna = True)
+band_std = df_final_utility_data['band'].std()
+# %%
+over_pred_run = 0
+counter = 0
+for index, row in df_final_utility_data.iterrows():
+    if(row['delta']>0):
+        counter+=1
+    else:
+        if(counter>over_pred_run):
+            over_pred_run = counter
+        counter = 0
+
+#%%
+under_pred_run = 0
+counter = 0
+for index, row in df_final_utility_data.iterrows():
+    if(row['delta']<0):
+        counter+=1
+    else:
+        if(counter>under_pred_run):
+            under_pred_run = counter
+        counter = 0
