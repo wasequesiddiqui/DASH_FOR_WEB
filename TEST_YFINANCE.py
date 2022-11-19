@@ -307,3 +307,9 @@ for index, row in df_final_utility_data.iterrows():
         if(counter>under_pred_run):
             under_pred_run = counter
         counter = 0
+
+# %% Average of positive returns
+positive_average = round(df_final_utility_data[df_final_utility_data['log_ret_^NSEI_y']>0]['log_ret_^NSEI_y'].mean()*100,4)
+# %%
+negative_average = round(df_final_utility_data[df_final_utility_data['log_ret_^NSEI_y']<0]['log_ret_^NSEI_y'].mean()*100,4)
+# %%
