@@ -280,13 +280,41 @@ delta_kurt = pd.Series(df_final_utility_data['delta']).kurtosis(skipna = True)
 delta_mean = pd.Series(df_final_utility_data['delta']).mean(skipna = True)
 delta_median = pd.Series(df_final_utility_data['delta']).median(skipna = True)
 delta_std = df_final_utility_data['delta'].std()
+df_key_metric = pd.DataFrame()
+
+#%% 
+lst_description = []
+lst_value = []
+
+#%%
+lst_description.append("Kurstosis of prediction Delta")
+lst_value.append(delta_kurt)
+lst_description.append("Mean of prediction Delta")
+lst_value.append(delta_mean)
+lst_description.append("Median of prediction Delta")
+lst_value.append(delta_median)
+lst_description.append("Std. Deviation of prediction Delta")
+lst_value.append(delta_std)
 
 # %%
 band_kurt = pd.Series(df_final_utility_data['band']).kurtosis(skipna = True)
 band_mean = pd.Series(df_final_utility_data['band']).mean(skipna = True)
 band_median = pd.Series(df_final_utility_data['band']).median(skipna = True)
 band_std = df_final_utility_data['band'].std()
-# %%
+
+lst_description.append("Kurstosis of prediction Band")
+lst_value.append(band_kurt)
+lst_description.append("Mean of prediction Band")
+lst_value.append(band_mean)
+lst_description.append("Median of prediction Band")
+lst_value.append(band_median)
+lst_description.append("Std. Deviation of prediction Band")
+lst_value.append(band_std)
+#%%
+bull_points = 0
+bear_points = 0
+
+# %% Continuous days of over prediction run
 over_pred_run = 0
 counter = 0
 for index, row in df_final_utility_data.iterrows():
@@ -296,8 +324,10 @@ for index, row in df_final_utility_data.iterrows():
         if(counter>over_pred_run):
             over_pred_run = counter
         counter = 0
+lst_description.append("Continuous days for over prediction")
+lst_value.append(over_pred_run)
 
-#%%
+#%% Continuous days of under prediction run
 under_pred_run = 0
 counter = 0
 for index, row in df_final_utility_data.iterrows():
@@ -307,9 +337,67 @@ for index, row in df_final_utility_data.iterrows():
         if(counter>under_pred_run):
             under_pred_run = counter
         counter = 0
+lst_description.append("Continuous days for under prediction")
+lst_value.append(under_pred_run)
 
 # %% Average of positive returns
 positive_average = round(df_final_utility_data[df_final_utility_data['log_ret_^NSEI_y']>0]['log_ret_^NSEI_y'].mean()*100,4)
+lst_description.append("Average of positive returns")
+lst_value.append(positive_average)
+
 # %%
 negative_average = round(df_final_utility_data[df_final_utility_data['log_ret_^NSEI_y']<0]['log_ret_^NSEI_y'].mean()*100,4)
-# %%
+lst_description.append("Average of Negative returns")
+lst_value.append(negative_average)
+
+# %% Continuous days of profits actual
+profit_run = 0
+counter = 0
+for index, row in df_final_utility_data.iterrows():
+    if(row['log_ret_^NSEI_y']>0):
+        counter+=1
+    else:
+        if(counter>profit_run):
+            profit_run = counter
+        counter = 0
+lst_description.append("Continuous days of profits actual")
+lst_value.append(profit_run)
+
+# %% continuous days of losses actual
+losses_run = 0
+counter = 0
+for index, row in df_final_utility_data.iterrows():
+    if(row['log_ret_^NSEI_y']<0):
+        counter+=1
+    else:
+        if(counter>losses_run):
+            losses_run = counter
+        counter = 0
+lst_description.append("Continuous days of losses actual")
+lst_value.append(losses_run)
+
+# %% continuous days of profit predicted
+pred_profit_run = 0
+counter = 0
+for index, row in df_final_utility_data.iterrows():
+    if(row['log_ret_^NSEI_y']>0):
+        counter+=1
+    else:
+        if(counter>pred_profit_run):
+            pred_profit_run = counter
+        counter = 0
+lst_description.append("Continuous days of profit predicted")
+lst_value.append(pred_profit_run)
+
+# %% continuous days of loss predicted
+pred_loss_run = 0
+counter = 0
+for index, row in df_final_utility_data.iterrows():
+    if(row['log_ret_^NSEI_y']<0):
+        counter+=1
+    else:
+        if(counter>pred_loss_run):
+            pred_loss_run = counter
+        counter = 0
+lst_description.append("Continuous days of losses predicted")
+lst_value.append(pred_loss_run)
