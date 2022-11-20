@@ -18,6 +18,7 @@ from dateutil.rrule import rrule, DAILY
 from datetime import datetime
 from prophet.diagnostics import cross_validation
 from prophet.diagnostics import performance_metrics
+from dash import dash_table
 
 # %%
 def get_log_return(ticker, column_name):
@@ -401,3 +402,49 @@ for index, row in df_final_utility_data.iterrows():
         counter = 0
 lst_description.append("Continuous days of losses predicted")
 lst_value.append(pred_loss_run)
+
+# %% analysis to sense if the market is in bull mode or bear mode
+if (over_pred_run>under_pred_run):
+    bull_points+=1
+else:
+    bear_points+=1
+if (positive_average>negative_average):
+    bull_points+=1
+else:
+    bear_points+=1
+if(positive_average > (negative_average*-1)):
+    bull_points+=1
+else:
+    bear_points+=1
+if(profit_run > losses_run):
+    bull_points+=1
+else:
+    bear_points+=1
+if(pred_profit_run > pred_loss_run):
+    bull_points+=1
+else:
+    bear_points+=1
+if(delta_mean>0):
+    bull_points+=1
+else:
+    bear_points+=1
+
+# %%
+bull_grip = round(bull_points / (bull_points + bear_points)*100,2)
+bear_grip = round(bear_points / (bull_points + bear_points)*100,2)
+# %%
+lst_description.append("Bull Grip")
+lst_value.append(bull_grip)
+lst_description.append("Bear Grip")
+lst_value.append(bear_grip)
+
+# %%
+df_analysis = pd.DataFrame()
+df_analysis['Description'] = lst_description
+df_analysis['Values'] = lst_value
+
+# %%
+dash_table.DataTable(df_analysis.to_dict('records'),[{"Description":i,"Values":i} for i in df_analysis.columns])
+
+# %%
+display(df_analysis)
