@@ -19,6 +19,7 @@ from datetime import datetime
 from prophet.diagnostics import cross_validation
 from prophet.diagnostics import performance_metrics
 from dash import dash_table
+from IPython.display import display
 
 # %%
 def get_log_return(ticker, column_name):
