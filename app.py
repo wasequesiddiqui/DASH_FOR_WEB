@@ -1,4 +1,5 @@
 #%%
+
 import dash
 import pandas as pd
 import prophet as p
@@ -212,6 +213,9 @@ df_final_utility_data['pred_lower'] = lst_predicted_close_lower
 df_final_utility_data['pred_upper'] = lst_predicted_close_upper
 df_final_utility_data['pred_close'] = lst_predicted_close
 df_final_utility_data['delta'] = df_final_utility_data['pred_close'] - df_final_utility_data['Close']
+
+## Getting data ready for bull bear analysis
+
 ##
 external_stylesheets = [
     {

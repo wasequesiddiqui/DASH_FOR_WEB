@@ -3,9 +3,7 @@ import yfinance as yf
 import itertools
 import prophet as p
 import numpy as np
-import investpy as ip
 import pandas as pd
-import investpy as inv
 import yfinance as yf
 import numpy as np
 import plotly.express as px
